@@ -90,7 +90,6 @@ from .generic import (
 )
 from .types import OutlineType, PagemodeType
 from .xmp import XmpInformation
-import xml.etree.ElementTree as ET
 
 
 def convert_to_int(d: bytes, size: int) -> Union[int, Tuple[Any, ...]]:
@@ -267,7 +266,7 @@ class PdfDocCommon:
 
     @abstractmethod
     def get_object(
-            self, indirect_reference: Union[int, IndirectObject]
+        self, indirect_reference: Union[int, IndirectObject]
     ) -> Optional[PdfObject]:
         ...  # pragma: no cover
 
@@ -301,9 +300,9 @@ class PdfDocCommon:
 
     @abstractmethod
     def _repr_mimebundle_(
-            self,
-            include: Union[None, Iterable[str]] = None,
-            exclude: Union[None, Iterable[str]] = None,
+        self,
+        include: Union[None, Iterable[str]] = None,
+        exclude: Union[None, Iterable[str]] = None,
     ) -> Dict[str, Any]:
         """
         Integration into Jupyter Notebooks.
@@ -382,7 +381,7 @@ class PdfDocCommon:
     def get_named_dest_root(self) -> ArrayObject:
         named_dest = ArrayObject()
         if CA.NAMES in self.root_object and isinstance(
-                self.root_object[CA.NAMES], DictionaryObject
+            self.root_object[CA.NAMES], DictionaryObject
         ):
             names = cast(DictionaryObject, self.root_object[CA.NAMES])
             names_ref = names.indirect_reference
@@ -415,9 +414,9 @@ class PdfDocCommon:
 
     ## common
     def _get_named_destinations(
-            self,
-            tree: Union[TreeObject, None] = None,
-            retval: Optional[Any] = None,
+        self,
+        tree: Union[TreeObject, None] = None,
+        retval: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Retrieve the named destinations present in the document.
@@ -488,11 +487,11 @@ class PdfDocCommon:
     # See §12.3.2 of the PDF 1.7 or PDF 2.0 specification.
 
     def get_fields(
-            self,
-            tree: Optional[TreeObject] = None,
-            retval: Optional[Dict[Any, Any]] = None,
-            fileobj: Optional[Any] = None,
-            stack: Optional[List[PdfObject]] = None,
+        self,
+        tree: Optional[TreeObject] = None,
+        retval: Optional[Dict[Any, Any]] = None,
+        fileobj: Optional[Any] = None,
+        stack: Optional[List[PdfObject]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Extract field data if this PDF contains interactive form fields.
@@ -541,22 +540,22 @@ class PdfDocCommon:
             return cast(str, parent["/TM"])
         elif "/Parent" in parent:
             return (
-                    self._get_qualified_field_name(
-                        cast(DictionaryObject, parent["/Parent"])
-                    )
-                    + "."
-                    + cast(str, parent.get("/T", ""))
+                self._get_qualified_field_name(
+                    cast(DictionaryObject, parent["/Parent"])
+                )
+                + "."
+                + cast(str, parent.get("/T", ""))
             )
         else:
             return cast(str, parent.get("/T", ""))
 
     def _build_field(
-            self,
-            field: Union[TreeObject, DictionaryObject],
-            retval: Dict[Any, Any],
-            fileobj: Any,
-            field_attributes: Any,
-            stack: List[PdfObject],
+        self,
+        field: Union[TreeObject, DictionaryObject],
+        retval: Dict[Any, Any],
+        fileobj: Any,
+        field_attributes: Any,
+        stack: List[PdfObject],
     ) -> None:
         if all(attr not in field for attr in ("/T", "/TM")):
             return
@@ -585,19 +584,19 @@ class PdfDocCommon:
                         states.append(s)
                 retval[key][NameObject("/_States_")] = ArrayObject(states)
             if (
-                    obj.get(FA.Ff, 0) & FA.FfBits.NoToggleToOff != 0
-                    and "/Off" in retval[key]["/_States_"]
+                obj.get(FA.Ff, 0) & FA.FfBits.NoToggleToOff != 0
+                and "/Off" in retval[key]["/_States_"]
             ):
                 del retval[key]["/_States_"][retval[key]["/_States_"].index("/Off")]
         # at last for order
         self._check_kids(field, retval, fileobj, stack)
 
     def _check_kids(
-            self,
-            tree: Union[TreeObject, DictionaryObject],
-            retval: Any,
-            fileobj: Any,
-            stack: List[PdfObject],
+        self,
+        tree: Union[TreeObject, DictionaryObject],
+        retval: Any,
+        fileobj: Any,
+        stack: List[PdfObject],
     ) -> None:
         if tree in stack:
             logger_warning(
@@ -614,13 +613,13 @@ class PdfDocCommon:
     def _write_field(self, fileobj: Any, field: Any, field_attributes: Any) -> None:
         field_attributes_tuple = FA.attributes()
         field_attributes_tuple = (
-                field_attributes_tuple + CheckboxRadioButtonAttributes.attributes()
+            field_attributes_tuple + CheckboxRadioButtonAttributes.attributes()
         )
 
         for attr in field_attributes_tuple:
             if attr in (
-                    FA.Kids,
-                    FA.AA,
+                FA.Kids,
+                FA.AA,
             ):
                 continue
             attr_name = field_attributes[attr]
@@ -668,9 +667,9 @@ class PdfDocCommon:
                 return k
             else:
                 return (
-                        k
-                        + "."
-                        + str(sum([1 for kk in fields if kk.startswith(k + ".")]) + 2)
+                    k
+                    + "."
+                    + str(sum([1 for kk in fields if kk.startswith(k + ".")]) + 2)
                 )
 
         # Retrieve document form fields
@@ -687,7 +686,7 @@ class PdfDocCommon:
         return ff
 
     def get_pages_showing_field(
-            self, field: Union[Field, PdfObject, IndirectObject]
+        self, field: Union[Field, PdfObject, IndirectObject]
     ) -> List[PageObject]:
         """
         Provides list of pages where the field is called.
@@ -758,7 +757,7 @@ class PdfDocCommon:
 
     @property
     def open_destination(
-            self,
+        self,
     ) -> Union[None, Destination, TextStringObject, ByteStringObject]:
         """
         Property to access the opening destination (``/OpenAction`` entry in
@@ -800,7 +799,7 @@ class PdfDocCommon:
         return self._get_outline()
 
     def _get_outline(
-            self, node: Optional[DictionaryObject] = None, outline: Optional[Any] = None
+        self, node: Optional[DictionaryObject] = None, outline: Optional[Any] = None
     ) -> OutlineType:
         if outline is None:
             outline = []
@@ -864,7 +863,7 @@ class PdfDocCommon:
 
     @abstractmethod
     def _get_page_number_by_indirect(
-            self, indirect_reference: Union[None, int, NullObject, IndirectObject]
+        self, indirect_reference: Union[None, int, NullObject, IndirectObject]
     ) -> Optional[int]:
         ...  # pragma: no cover
 
@@ -894,20 +893,20 @@ class PdfDocCommon:
         return self._get_page_number_by_indirect(destination.page)
 
     def _build_destination(
-            self,
-            title: str,
-            array: Optional[
-                List[
-                    Union[NumberObject, IndirectObject, None, NullObject, DictionaryObject]
-                ]
-            ],
+        self,
+        title: str,
+        array: Optional[
+            List[
+                Union[NumberObject, IndirectObject, None, NullObject, DictionaryObject]
+            ]
+        ],
     ) -> Destination:
         page, typ = None, None
         # handle outline items with missing or invalid destination
         if (
-                isinstance(array, (NullObject, str))
-                or (isinstance(array, ArrayObject) and len(array) == 0)
-                or array is None
+            isinstance(array, (NullObject, str))
+            or (isinstance(array, ArrayObject) and len(array) == 0)
+            or array is None
         ):
             page = NullObject()
             return Destination(title, page, Fit.fit())
@@ -1082,10 +1081,10 @@ class PdfDocCommon:
             return None
 
     def _flatten(
-            self,
-            pages: Union[None, DictionaryObject, PageObject] = None,
-            inherit: Optional[Dict[str, Any]] = None,
-            indirect_reference: Optional[IndirectObject] = None,
+        self,
+        pages: Union[None, DictionaryObject, PageObject] = None,
+        inherit: Optional[Dict[str, Any]] = None,
+        indirect_reference: Optional[IndirectObject] = None,
     ) -> None:
         inheritable_page_attributes = (
             NameObject(PG.RESOURCES),
@@ -1141,9 +1140,9 @@ class PdfDocCommon:
             self.flattened_pages.append(page_obj)  # type: ignore
 
     def remove_page(
-            self,
-            page: Union[int, PageObject, IndirectObject],
-            clean: bool = False,
+        self,
+        page: Union[int, PageObject, IndirectObject],
+        clean: bool = False,
     ) -> None:
         """
         Remove page from pages list.
@@ -1199,7 +1198,7 @@ class PdfDocCommon:
         return IndirectObject(num, gen, self).get_object()
 
     def decode_permissions(
-            self, permissions_code: int
+        self, permissions_code: int
     ) -> Dict[str, bool]:  # pragma: no cover
         """Take the permissions as an integer, return the allowed access."""
         deprecate_with_replacement(
@@ -1268,50 +1267,6 @@ class PdfDocCommon:
         return retval
 
     @property
-    def xfa_dataset(self) -> ET:
-        if self._xfa_dataset is None:
-            self._parse_xfa_dataset()
-        return self._xfa_dataset
-
-    def _update_xfa_field(self, key, value):
-        if self._xfa_dataset is None and self.xfa is not None:
-            self._parse_xfa_dataset()
-
-        field = self._xfa_dataset.find(".//" + key)
-        if field is not None:
-            field.text = value
-            self._update_xfa_dataset_string()
-        else:
-            raise PdfReadError("{} not found, update not possible".format(key))
-
-    def _parse_xfa_dataset(self) -> ET:
-        # check if xfa exists for this PDF
-        if self.xfa is not None:
-            xfa = self.xfa
-            # check if xfa is an ArrayObject
-            if isinstance(xfa, Dict):
-                if 'datasets' in xfa:
-                # convert ByteString to str to create xfa dataset
-                    if isinstance(xfa['datasets'], bytes):
-                        xfa_str = xfa['datasets'].decode("utf-8")
-                        xfa_ds_elm = ET.fromstring(xfa_str)
-                        self._xfa_dataset = xfa_ds_elm
-
-    def _update_xfa_dataset_string(self):
-        if self._xfa_dataset is None:
-            raise PdfReadError("xfadataset not found")
-
-        namespace = self._xfa_dataset.tag.split('}')[0].strip('{')
-        ET.register_namespace('xfa',namespace)
-        xml_str = ET.tostring(self._xfa_dataset)
-
-        xfa_fields = cast(ArrayObject, self.root_object["/AcroForm"]['/XFA'])
-        if 'datasets' in xfa_fields:
-            index = xfa_fields.index('datasets') + 1
-            xfa_ds_object = xfa_fields[index].get_object()
-            xfa_ds_object.set_data(xml_str)
-
-    @property
     def attachments(self) -> Mapping[str, List[bytes]]:
         return LazyDict(
             {
@@ -1349,7 +1304,7 @@ class PdfDocCommon:
         return [out]
 
     def _get_attachments(
-            self, filename: Optional[str] = None
+        self, filename: Optional[str] = None
     ) -> Dict[str, Union[bytes, List[bytes]]]:
         """
         Retrieves all or selected file attachments of the PDF as a dictionary of file names

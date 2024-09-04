@@ -36,8 +36,6 @@ from io import BytesIO, FileIO, IOBase
 from itertools import compress
 from pathlib import Path
 from types import TracebackType
-import xml.etree.ElementTree as ET
-
 from typing import (
     IO,
     Any,
@@ -237,7 +235,6 @@ class PdfWriter(PdfDocCommon):
         self._encryption: Optional[Encryption] = None
         self._encrypt_entry: Optional[DictionaryObject] = None
         self._ID: Union[ArrayObject, None] = None
-        self._xfa_dataset: Union[ET,None] = None
 
     # for commonality
     @property
@@ -1035,7 +1032,6 @@ class PdfWriter(PdfDocCommon):
                     )
                 else:
                     writer_parent_annot[NameObject(FA.V)] = TextStringObject(value)
-                    self._update_xfa_field(field.replace('[0]',''),value)
                 if writer_parent_annot.get(FA.FT) in ("/Btn"):
                     # case of Checkbox button (no /FT found in Radio widgets
                     v = NameObject(value)
