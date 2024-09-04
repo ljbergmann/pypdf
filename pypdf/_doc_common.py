@@ -30,6 +30,7 @@
 
 import struct
 import zlib
+import re
 from abc import abstractmethod
 from datetime import datetime
 from typing import (
@@ -1275,15 +1276,25 @@ class PdfDocCommon:
 
     def _update_xfa_field(self, key, value, type):
 
+        # XFA Field names page https://pdfa.org/norm-refs/XFA-3_3.pdf
+        # get index of field name
+        pattern = re.compile("(.+)\[(\d+)\]")
+        if pattern.search(key).group(2) != None:
+            tag = pattern.search(key).group(1)
+            tag_index = int(pattern.search('F1[0]').group(2))
+        else:
+            tag = key
+            tag_index = 0
+
         if type == '/Btn':
             value = value[1:]
 
         if self._xfa_dataset is None and self.xfa is not None:
             self._parse_xfa_dataset()
 
-        field = self._xfa_dataset.find(".//" + key)
-        if field is not None:
-            field.text = value
+        fields = self._xfa_dataset.findall(".//" + tag)
+        if fields[tag_index] is not None:
+            fields[tag_index].text = value
             self._update_xfa_dataset_string()
         else:
             raise PdfReadError("{} not found, update not possible".format(key))
