@@ -1285,10 +1285,10 @@ class PdfDocCommon:
         else:
             tag = key
             tag_index = 0
-
-        if type == '/Btn':
+        # check if Checkbox (/Btn) or Radio box (None)
+        if type == '/Btn' or type is None:
             value = value[1:]
-
+        # check that
         if self._xfa_dataset is None and self.xfa is not None:
             self._parse_xfa_dataset()
 

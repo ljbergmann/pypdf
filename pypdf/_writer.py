@@ -1061,6 +1061,7 @@ class PdfWriter(PdfDocCommon):
                     logger_warning("Signature forms not implemented yet", __name__)
 
                 self._update_xfa_field(field, value, writer_annot.get(FA.FT))
+
     def reattach_fields(
         self, page: Optional[PageObject] = None
     ) -> List[DictionaryObject]:
